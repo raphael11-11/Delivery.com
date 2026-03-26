@@ -10,62 +10,89 @@ body{
     margin:0;
     font-family:Arial;
     background:#0f0f0f;
-    color:#fff;
+    color:white;
 }
 
 .container{
-    max-width:500px;
+    max-width:380px;
     margin:auto;
-    padding:20px;
+    padding:15px;
 }
 
 h1{
     text-align:center;
     color:#8a2be2;
+    font-size:18px;
 }
 
-input, select{
+input{
     width:100%;
-    padding:12px;
-    margin:10px 0;
-    border:none;
+    padding:10px;
+    margin-top:10px;
     border-radius:6px;
+    border:none;
 }
 
 button{
     width:100%;
-    padding:12px;
+    padding:10px;
+    margin-top:10px;
     background:#8a2be2;
     border:none;
     color:white;
     border-radius:6px;
-    font-weight:bold;
 }
 
 .card{
     background:#1c1c1c;
     padding:15px;
-    border-radius:10px;
-    margin-top:20px;
+    border-radius:12px;
+    margin-top:15px;
 }
 
-.status{
-    margin:10px 0;
+.timeline{
+    border-left:2px solid #555;
+    margin-left:10px;
+    padding-left:15px;
+}
+
+.step{
+    margin-bottom:15px;
+    position:relative;
+}
+
+.step::before{
+    content:"";
+    width:12px;
+    height:12px;
+    background:#555;
+    border-radius:50%;
+    position:absolute;
+    left:-22px;
+    top:3px;
+}
+
+.active::before{
+    background:#00bfff;
 }
 
 .active{
-    color:#00ffcc;
+    color:#00bfff;
 }
 
 .hold{
-    color:red;
+    color:#ff4d4d;
 }
 
-.footer{
-    margin-top:30px;
-    text-align:center;
-    font-size:12px;
-    color:#aaa;
+.fee{
+    color:#ff4d4d;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.small{
+    font-size:13px;
+    color:#ccc;
 }
 </style>
 </head>
@@ -76,123 +103,85 @@ button{
 
 <h1>Boy Alone Logistics</h1>
 
-<!-- TRACKING -->
-<div id="trackPage">
-    <input type="text" id="trackInput" placeholder="Enter Tracking Code">
-    <button onclick="track()">Track Package</button>
+<input type="text" id="code" placeholder="Enter Tracking Code">
+<button onclick="track()">Track</button>
 
-    <div id="result"></div>
-</div>
-
-<!-- ADMIN LOGIN -->
-<div id="adminLogin" style="display:none;">
-    <input type="password" id="adminPass" placeholder="Admin Password">
-    <button onclick="login()">Login</button>
-</div>
-
-<!-- ADMIN PANEL -->
-<div id="adminPanel" style="display:none;">
-    <h3>Admin Panel</h3>
-
-    <select id="status">
-        <option>Picked Up</option>
-        <option>In Transit</option>
-        <option>On Hold</option>
-        <option>Out for Delivery</option>
-        <option>Delivered</option>
-    </select>
-
-    <input type="text" id="location" placeholder="Current Location">
-    <input type="number" id="fee" placeholder="Clearance Fee ($)">
-    
-    <button onclick="save()">Update Status</button>
-</div>
-
-<div class="footer">
-© 2026 Boy Alone Logistics
-</div>
+<div id="result"></div>
 
 </div>
 
 <script>
 
-// DEFAULT DATA
 let data = {
     code: "00000008JHR",
     from: "Loma 642 Villa Diego Villarreal 66550, NLE MEX",
     to: "5757 W Century Blvd, Los Angeles, CA 90045",
     status: "On Hold",
     location: "California International Airport",
-    fee: 100
+    fee: 5000,
+    date: "Thu Mar 26 2026"
 };
 
-// LOAD SAVED DATA
-if(localStorage.getItem("tracking")){
-    data = JSON.parse(localStorage.getItem("tracking"));
-}
-
-// TRACK FUNCTION
 function track(){
-    let input = document.getElementById("trackInput").value;
+    let input = document.getElementById("code").value;
 
     if(input !== data.code){
         alert("Invalid tracking code");
         return;
     }
 
+    function active(step){
+        return data.status === step ? "active" : "";
+    }
+
     let holdMessage = "";
 
     if(data.status === "On Hold"){
         holdMessage = `
-        <p class="hold">
-        ⚠ Your package is currently on hold at California International Airport.<br>
-        Reason: Clearance fee required before delivery.<br>
-        Please pay $${data.fee} to continue delivery.
-        </p>`;
+        <div class="fee">
+        ⚠ Your package is on hold due to clearance payment.<br>
+        Pay $${data.fee} to proceed with delivery.
+        </div>`;
     }
 
     document.getElementById("result").innerHTML = `
     <div class="card">
-        <h3>${data.code}</h3>
-        <p><b>From:</b> ${data.from}</p>
-        <p><b>To:</b> ${data.to}</p>
 
-        <div class="status ${data.status==="On Hold"?"hold":"active"}">
-            <b>Status:</b> ${data.status}
+        <h3>${data.code}</h3>
+
+        <p class="small"><b>From:</b> ${data.from}</p>
+        <p class="small"><b>To:</b> ${data.to}</p>
+
+        <div class="timeline">
+
+            <div class="step ${active("Picked Up")}">
+                <b>Picked Up</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("In Transit")}">
+                <b>In Transit</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("On Hold")} hold">
+                <b>On Hold</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("Out for Delivery")}">
+                <b>Out for Delivery</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
         </div>
 
-        <p><b>Current Location:</b> ${data.location}</p>
+        <p class="small"><b>Current Location:</b> ${data.location}</p>
+        <p class="small"><b>Date:</b> ${data.date}</p>
+
         ${holdMessage}
+
     </div>`;
-}
-
-// ADMIN ACCESS (?admin)
-if(window.location.search.includes("admin")){
-    document.getElementById("trackPage").style.display = "none";
-    document.getElementById("adminLogin").style.display = "block";
-}
-
-// LOGIN
-function login(){
-    let pass = document.getElementById("adminPass").value;
-
-    if(pass === "1234"){
-        document.getElementById("adminLogin").style.display = "none";
-        document.getElementById("adminPanel").style.display = "block";
-    }else{
-        alert("Wrong password");
-    }
-}
-
-// SAVE ADMIN DATA
-function save(){
-    data.status = document.getElementById("status").value;
-    data.location = document.getElementById("location").value;
-    data.fee = document.getElementById("fee").value;
-
-    localStorage.setItem("tracking", JSON.stringify(data));
-
-    alert("Updated successfully");
 }
 
 </script>
