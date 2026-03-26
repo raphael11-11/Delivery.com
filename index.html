@@ -6,7 +6,7 @@
   <style>
     body {
       font-family: Arial;
-      background:#f2f4f7;
+      background:#eef1f5;
       margin:0;
     }
 
@@ -49,15 +49,16 @@
 
     .result {
       margin-top:20px;
-      background:#d9d0c3;
+      background:#d8cbb8;
       padding:20px;
       border-radius:12px;
       border-left:6px solid orange;
     }
 
     .title {
-      font-size:24px;
+      font-size:22px;
       font-weight:bold;
+      margin-bottom:15px;
     }
 
     .steps {
@@ -84,7 +85,7 @@
     }
 
     .done { background:green; }
-    .active { background:#2f4b7c; }
+    .active { background:#ccc; color:white; }
     .pending { background:#ccc; }
 
     .info {
@@ -125,7 +126,7 @@ function track() {
     return;
   }
 
-  let steps = ["Shipped", "In Transit", "On Hold", "Delivered"];
+  let steps = ["Shipped", "Transit", "Hold"];
 
   let currentIndex = steps.indexOf(data.status);
 
@@ -133,10 +134,12 @@ function track() {
     let className = "pending";
     let icon = "";
 
-    if (index < currentIndex) {
+    if (index === 0) {
       className = "done";
       icon = "✔";
-    } else if (index === currentIndex) {
+    }
+
+    if (step === data.status) {
       className = "active";
       icon = "✔";
     }
@@ -159,8 +162,6 @@ function track() {
       </div>
 
       <div class="info"><b>Tracking:</b> ${code}</div>
-      <div class="info"><b>Origin:</b> ${data.origin}</div>
-      <div class="info"><b>Destination:</b> ${data.destination}</div>
       <div class="info"><b>Location:</b> ${data.location}</div>
       <div class="info"><b>Date:</b> ${data.date}</div>
 
@@ -173,3 +174,4 @@ function track() {
 
 </body>
 </html>
+      
