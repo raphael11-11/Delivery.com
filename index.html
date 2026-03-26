@@ -6,21 +6,22 @@
   <style>
     body {
       font-family: Arial;
-      background:#eef1f5;
       margin:0;
+      background:#f5f5f5;
     }
 
     header {
-      background:#2f4b7c;
+      background:#4d148c;
       color:white;
       padding:15px;
       font-size:20px;
+      font-weight:bold;
     }
 
     .container {
       max-width:600px;
-      margin:30px auto;
-      padding:20px;
+      margin:20px auto;
+      padding:15px;
     }
 
     .card {
@@ -32,16 +33,16 @@
     input {
       width:100%;
       padding:12px;
-      margin-top:10px;
       border-radius:8px;
       border:1px solid #ccc;
+      margin-top:10px;
     }
 
     button {
       width:100%;
       padding:12px;
       margin-top:10px;
-      background:#2f4b7c;
+      background:#4d148c;
       color:white;
       border:none;
       border-radius:8px;
@@ -49,61 +50,67 @@
 
     .result {
       margin-top:20px;
-      background:#d8cbb8;
-      padding:20px;
-      border-radius:12px;
-      border-left:6px solid orange;
     }
 
-    .title {
-      font-size:22px;
-      font-weight:bold;
-      margin-bottom:15px;
-    }
-
-    .steps {
-      display:flex;
-      justify-content:space-between;
+    .tracking {
+      text-align:center;
       margin:20px 0;
+      font-size:18px;
+    }
+
+    .timeline {
+      position:relative;
+      margin-left:20px;
+      padding-left:30px;
+      border-left:4px solid #ddd;
     }
 
     .step {
-      text-align:center;
-      flex:1;
+      margin-bottom:25px;
+      position:relative;
     }
 
     .circle {
-      width:40px;
-      height:40px;
+      width:18px;
+      height:18px;
+      background:#ccc;
       border-radius:50%;
-      margin:auto;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      color:white;
+      position:absolute;
+      left:-38px;
+      top:5px;
+    }
+
+    .active {
+      background:#4d148c;
+      width:24px;
+      height:24px;
+      left:-41px;
+    }
+
+    .done {
+      background:#4d148c;
+    }
+
+    .label {
       font-weight:bold;
     }
 
-    .done { background:green; }
-    .active { background:#ccc; color:white; }
-    .pending { background:#ccc; }
-
-    .info {
-      margin-top:8px;
-      font-size:16px;
+    .small {
+      color:#555;
+      font-size:14px;
     }
 
     .fee {
+      margin-top:15px;
       color:red;
       font-weight:bold;
-      margin-top:10px;
     }
   </style>
 </head>
 
 <body>
 
-<header>🌍 Global Express</header>
+<header>📦 Global Express</header>
 
 <div class="container">
   <div class="card">
@@ -122,32 +129,31 @@ function track() {
   let data = JSON.parse(localStorage.getItem(code));
 
   if (!data) {
-    document.getElementById("output").innerHTML = "❌ Tracking Not Found";
+    document.getElementById("output").innerHTML = "❌ Not Found";
     return;
   }
 
-  let steps = ["Shipped", "Transit", "Hold"];
+  let steps = [
+    {name:"Picked Up", key:"Shipped"},
+    {name:"In Transit", key:"Transit"},
+    {name:"On Hold", key:"Hold"},
+    {name:"Out for Delivery", key:"Delivery"}
+  ];
 
-  let currentIndex = steps.indexOf(data.status);
+  let htmlSteps = steps.map(step => {
+    let className = "";
 
-  let stepHTML = steps.map((step, index) => {
-    let className = "pending";
-    let icon = "";
-
-    if (index === 0) {
-      className = "done";
-      icon = "✔";
-    }
-
-    if (step === data.status) {
+    if (step.key === data.status) {
       className = "active";
-      icon = "✔";
+    } else if (steps.findIndex(s=>s.key===step.key) < steps.findIndex(s=>s.key===data.status)) {
+      className = "done";
     }
 
     return `
       <div class="step">
-        <div class="circle ${className}">${icon}</div>
-        <div>${step}</div>
+        <div class="circle ${className}"></div>
+        <div class="label">${step.name}</div>
+        <div class="small">${data.location}</div>
       </div>
     `;
   }).join("");
@@ -155,15 +161,18 @@ function track() {
   document.getElementById("output").innerHTML = `
     <div class="result">
 
-      <div class="title">${data.status}</div>
-
-      <div class="steps">
-        ${stepHTML}
+      <div class="tracking">
+        <b>${code}</b><br>
+        From: ${data.origin}<br>
+        To: ${data.destination}
       </div>
 
-      <div class="info"><b>Tracking:</b> ${code}</div>
-      <div class="info"><b>Location:</b> ${data.location}</div>
-      <div class="info"><b>Date:</b> ${data.date}</div>
+      <div class="timeline">
+        ${htmlSteps}
+      </div>
+
+      <div class="small">Current Location: ${data.location}</div>
+      <div class="small">Date: ${data.date}</div>
 
       ${data.fee ? `<div class="fee">⚠ Clearance Fee: $${data.fee}</div>` : ""}
 
@@ -174,4 +183,3 @@ function track() {
 
 </body>
 </html>
-      
