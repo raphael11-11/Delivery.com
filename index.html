@@ -14,96 +14,86 @@ body{
 }
 
 .container{
-    max-width:360px;
+    max-width:380px;
     margin:auto;
     padding:15px;
 }
 
 h1{
     text-align:center;
-    color:#c77dff;
-    font-size:20px;
+    color:#8a2be2;
+    font-size:18px;
 }
 
 input{
     width:100%;
-    padding:12px;
-    border-radius:8px;
-    border:none;
+    padding:10px;
     margin-top:10px;
+    border-radius:6px;
+    border:none;
 }
 
 button{
     width:100%;
-    padding:12px;
+    padding:10px;
     margin-top:10px;
-    background:linear-gradient(to right,#6a00f4,#a100ff);
+    background:#8a2be2;
     border:none;
     color:white;
-    border-radius:8px;
-    font-weight:bold;
+    border-radius:6px;
 }
 
-.result{
-    margin-top:20px;
+.card{
+    background:#1c1c1c;
+    padding:15px;
+    border-radius:12px;
+    margin-top:15px;
 }
 
 .timeline{
-    position:relative;
-    margin-top:20px;
-    padding-left:25px;
-}
-
-.timeline::before{
-    content:"";
-    position:absolute;
-    left:10px;
-    top:0;
-    bottom:0;
-    width:2px;
-    background:#444;
+    border-left:2px solid #555;
+    margin-left:10px;
+    padding-left:15px;
 }
 
 .step{
+    margin-bottom:15px;
     position:relative;
-    margin-bottom:25px;
 }
 
 .step::before{
     content:"";
-    position:absolute;
-    left:-17px;
-    top:5px;
     width:12px;
     height:12px;
     background:#555;
     border-radius:50%;
+    position:absolute;
+    left:-22px;
+    top:3px;
 }
 
-.step.active::before{
+.active::before{
     background:#00bfff;
-    box-shadow:0 0 6px #00bfff;
 }
 
-.title{
-    font-weight:bold;
-}
-
-.small{
-    font-size:13px;
-    color:#bbb;
+.active{
+    color:#00bfff;
 }
 
 .hold{
     color:#ff4d4d;
 }
 
-.alert{
-    margin-top:15px;
+.fee{
     color:#ff4d4d;
-    font-size:14px;
+    margin-top:10px;
+    font-weight:bold;
 }
 
+.small{
+    font-size:13px;
+    color:#ccc;
+}
 </style>
 </head>
 
@@ -113,85 +103,85 @@ button{
 
 <h1>Boy Alone Logistics</h1>
 
-<input id="track" placeholder="Enter Tracking Code">
-<button onclick="track()">Track Package</button>
+<input type="text" id="code" placeholder="Enter Tracking Code">
+<button onclick="track()">Track</button>
 
-<div id="output" class="result"></div>
+<div id="result"></div>
 
 </div>
 
 <script>
 
 let data = {
-    code:"00000008JHR",
-    from:"Loma 642 Villa Diego Villarreal 66550, NLE MEX",
-    to:"5757 W Century Blvd, Los Angeles, CA 90045",
-    status:"On Hold",
-    location:"California International Airport",
-    fee:100,
-    date:"Thu Mar 26 2026"
+    code: "00000008JHR",
+    from: "Loma 642 Villa Diego Villarreal 66550, NLE MEX",
+    to: "5757 W Century Blvd, Los Angeles, CA 90045",
+    status: "On Hold",
+    location: "California International Airport",
+    fee: 5000,
+    date: "Thu Mar 26 2026"
 };
 
 function track(){
+    let input = document.getElementById("code").value;
 
-    let val = document.getElementById("track").value;
-
-    if(val !== data.code){
-        alert("Wrong tracking number");
+    if(input !== data.code){
+        alert("Invalid tracking code");
         return;
     }
 
-    function active(s){
-        return data.status === s ? "active" : "";
+    function active(step){
+        return data.status === step ? "active" : "";
     }
 
-    let message = "";
+    let holdMessage = "";
 
     if(data.status === "On Hold"){
-        message = `
-        <div class="alert">
-        ⚠ Your package is currently on hold at California International Airport.<br>
-        Reason: Clearance fee required.<br>
-        Pay $${data.fee} to continue delivery.
+        holdMessage = `
+        <div class="fee">
+        ⚠ Your package is on hold due to clearance payment.<br>
+        Pay $${data.fee} to proceed with delivery.
         </div>`;
     }
 
-    document.getElementById("output").innerHTML = `
-    
-    <h3>${data.code}</h3>
+    document.getElementById("result").innerHTML = `
+    <div class="card">
 
-    <p><b>From:</b><br>${data.from}</p>
-    <p><b>To:</b><br>${data.to}</p>
+        <h3>${data.code}</h3>
 
-    <div class="timeline">
+        <p class="small"><b>From:</b> ${data.from}</p>
+        <p class="small"><b>To:</b> ${data.to}</p>
 
-        <div class="step ${active("Picked Up")}">
-            <div class="title">Picked Up</div>
-            <div class="small">${data.location}</div>
+        <div class="timeline">
+
+            <div class="step ${active("Picked Up")}">
+                <b>Picked Up</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("In Transit")}">
+                <b>In Transit</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("On Hold")} hold">
+                <b>On Hold</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
+            <div class="step ${active("Out for Delivery")}">
+                <b>Out for Delivery</b><br>
+                <span class="small">${data.location}</span>
+            </div>
+
         </div>
 
-        <div class="step ${active("In Transit")}">
-            <div class="title">In Transit</div>
-            <div class="small">${data.location}</div>
-        </div>
+        <p class="small"><b>Current Location:</b> ${data.location}</p>
+        <p class="small"><b>Date:</b> ${data.date}</p>
 
-        <div class="step ${active("On Hold")} hold">
-            <div class="title">On Hold</div>
-            <div class="small">${data.location}</div>
-        </div>
+        ${holdMessage}
 
-        <div class="step ${active("Out for Delivery")}">
-            <div class="title">Out for Delivery</div>
-            <div class="small">${data.location}</div>
-        </div>
-
-    </div>
-
-    <p class="small"><b>Current Location:</b> ${data.location}</p>
-    <p class="small"><b>Date:</b> ${data.date}</p>
-
-    ${message}
-    `;
+    </div>`;
 }
 
 </script>
