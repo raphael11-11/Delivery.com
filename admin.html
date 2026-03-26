@@ -37,7 +37,9 @@
   <h3>Update Tracking</h3>
 
   <input id="code" placeholder="Tracking Code">
-  <input id="location" placeholder="Location">
+  <input id="origin" placeholder="Origin">
+  <input id="destination" placeholder="Destination">
+  <input id="location" placeholder="Current Location">
 
   <select id="status">
     <option>Shipped</option>
@@ -68,6 +70,8 @@ function save() {
   let code = document.getElementById("code").value;
 
   let data = {
+    origin: document.getElementById("origin").value,
+    destination: document.getElementById("destination").value,
     location: document.getElementById("location").value,
     status: document.getElementById("status").value,
     fee: document.getElementById("fee").value,
